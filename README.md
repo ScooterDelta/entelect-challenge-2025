@@ -32,7 +32,7 @@ This project uses Poetry for dependency management.
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/entelect-challenge-2025.git
+git clone https://github.com/ScooterDelta/entelect-challenge-2025.git
 cd entelect-challenge-2025
 ```
 
