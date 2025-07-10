@@ -24,6 +24,8 @@ wheels/
 .installed.cfg
 *.egg
 output/
+*.zip
+submit.sh
 
 # Unit test / coverage reports
 htmlcov/
