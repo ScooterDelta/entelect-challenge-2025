@@ -9,10 +9,10 @@ import { writeOutput } from "./write-output";
 const resources: ResourcesData = readResourceFile();
 
 const targets = {
-  // 1: { resourceCalc: resourceValueBasic, placementCalc: canPlace },
-  // 2: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat },
-  // 3: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat },
-  4: { resourceCalc: minCostResourceValue, placementCalc: canPlaceCompat }
+  // 1: { resourceCalc: resourceValueBasic, placementCalc: canPlace ,limit: 9999999999999999},
+  // 2: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat,limit: 9999999999999999 },
+  // 3: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat, limit: 9999999999999999 },
+  4: { resourceCalc: minCostResourceValue, placementCalc: canPlaceCompat,limit: 10000000 }
 }
 
 for (const [target, funcs] of Object.entries(targets)) {
@@ -20,7 +20,7 @@ for (const [target, funcs] of Object.entries(targets)) {
 
   const allowedResource = getAllowedResources(resources, input.available_resources);
 
-  const resultGrid = fillGridDump(input.grid, allowedResource, funcs.placementCalc, funcs.resourceCalc);
+  const resultGrid = fillGridDump(input.grid, allowedResource, funcs.placementCalc, funcs.resourceCalc, funcs.limit);
 
   console.log(`Score ${target}: ${calculateScore(resultGrid)}`);
   await writeOutput(parseInt(target), resultGrid);

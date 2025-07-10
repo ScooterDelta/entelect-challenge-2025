@@ -93,7 +93,8 @@ export function fillGridDump(
     left: number,
     resource: Resource
   ) => boolean,
-  resourceCalc: (resource: Resource) => number
+  resourceCalc: (resource: Resource) => number,
+  limitCost:number
 ): number[][] {
   // let improved = true;
 
@@ -101,16 +102,16 @@ export function fillGridDump(
   //   improved = false;
   //   let bestGrid = grid;
   //   let bestScore = calculateScore(grid);
-
+ let  cost = 0;
   var insertedResources: number[] = [];
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[0].length; x++) {
       const orderedResources = prioritizeResources(resources, insertedResources, resourceCalc);
       for (const resourceDef of orderedResources) {
         for (const orientation of resourceDef.orientations) {
-          if (canPlaceFn(grid, orientation.cells, y, x, resourceDef)) {
+          if (canPlaceFn(grid, orientation.cells, y, x, resourceDef) && limitCost > cost) {
             placeShape(grid, orientation.cells, y, x, resourceDef.resource_id);
-
+            cost+=resourceDef.cost;
             // Manage inserted resources
             if (!insertedResources.includes(resourceDef.resource_id)) {
               insertedResources.push(resourceDef.resource_id);
