@@ -7,13 +7,16 @@ import { ResourcesData } from "./types/resources";
 import { writeOutput } from "./write-output";
 
 const resources: ResourcesData = readResourceFile();
-const input1 = await readInputFile(1);
 
-console.log("Resources Data Loaded Successfully");
+const targets = [1, 2, 3, 4];
 
-const allowedReaources = getAllowedResources(resources, input1.available_resources);
+for (const target of targets) {
+  const input = await readInputFile(target);
 
-const resultGrid = fillGridDump(input1.grid, allowedReaources);
+  const allowedResource = getAllowedResources(resources, input.available_resources);
 
-console.log(calculateScore(resultGrid));
-await writeOutput(1, resultGrid);
+  const resultGrid = fillGridDump(input.grid, allowedResource);
+
+  console.log(`Score ${target}: ${calculateScore(resultGrid)}`);
+  await writeOutput(1, resultGrid);
+};

@@ -1,9 +1,9 @@
 import { Resource, ResourcesData } from "./types/resources";
 
-export function getAllowedResources(resourceData:ResourcesData, allowedReaources: number[]){
-    let resournce : Resource[] = [];
-    allowedReaources.forEach((resouce) => {
-        resournce.push(resourceData.resources[resouce]);  
-    });
-    return resournce;
+export function getAllowedResources(resourceData: ResourcesData, allowedResources: number[]) {
+  let resource: Resource[] = [];
+  allowedResources.forEach((allowedResource) => {
+    resource.push(resourceData.resources.find(r => r.resource_id === allowedResource) as Resource);
+  });
+  return resource;
 }
