@@ -1,3 +1,4 @@
+import { calculateScore } from "./score";
 import { Resource } from "./types/resources";
 
 export function canPlace(grid: number[][], shape: [number, number][], top: number, left: number): boolean {
@@ -32,30 +33,39 @@ export function scorePlacement(grid: number[][]): number {
  }
   
 
- export function fillGridDump(grid: number[][], resources: Resource[]):  number[][] {
-    let placedCount = 0;
-    let placed = true;
+ export function fillGridDump(
+    grid: number[][],
+    resources: Resource[]
+  ): number[][] {
+    let improved = true;
   
-    while (placed) {
-      placed = false;
+    while (improved) {
+      improved = false;
+      let bestGrid = grid;
+      let bestScore = calculateScore(grid);
   
-      for (const resourceDef of resources) {
-        for (const orientation of resourceDef.orientations) {
-            for (let y = 0; y < grid.length; y++) {
-                for (let x = 0; x < grid[0].length; x++) {
-                if (canPlace(grid, orientation.cells, y, x)) {
-                    grid = placeShape(grid, orientation.cells, y, x, resourceDef.resource_id);
-                    placed = true;
-                    break;
+      for (let y = 0; y < grid.length; y++) {
+        for (let x = 0; x < grid[0].length; x++) {
+          for (const resourceDef of resources) {
+            for (const orientation of resourceDef.orientations) {
+              if (canPlace(grid, orientation.cells, y, x)) {
+                const newGrid = placeShape(grid, orientation.cells, y, x, resourceDef.resource_id);
+                const newScore = calculateScore(newGrid);
+  
+                if (newScore > bestScore) {
+                  bestScore = newScore;
+                  bestGrid = newGrid;
+                  improved = true;
                 }
+              }
             }
-            if (placed) break;
           }
-          if (placed) break;
+        }
       }
-      if (placed) break;
-    }
+  
+      grid = bestGrid;
     }
   
     return grid;
   }
+  
