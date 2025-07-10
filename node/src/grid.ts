@@ -14,7 +14,7 @@ export function canPlace(grid: number[][], shape: [number, number][], top: numbe
   }
   return true;
 }
-export function canPlaceLevel4(
+export function canPlaceCompat(
   grid: number[][],
   shape: [number, number][],
   top: number,
@@ -108,8 +108,6 @@ export function fillGridDump(
         for (const orientation of resourceDef.orientations) {
           if (canPlaceFn(grid, orientation.cells, y, x, resourceDef)) {
             placeShape(grid, orientation.cells, y, x, resourceDef.resource_id);
-            console.log(`Placing (${x}, ${y}) with resource ${resourceDef.resource_id} (${resourceDef.name})`);
-            // const newScore = calculateScoreFn(newGrid);
 
             // if (newScore > bestScore) {
             //   bestScore = newScore;
