@@ -9,7 +9,7 @@ export type Resource =
     incompatible_with: number[];
     orientations: {
         rotation: number;
-        cells: number[][]
+        cells: [number, number][]
     }
 }
 
