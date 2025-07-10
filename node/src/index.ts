@@ -1,5 +1,5 @@
 import { getAllowedResources } from "./get-resources";
-import { canPlaceCompat, fillGridDump } from "./grid";
+import { canPlace, canPlaceCompat, fillGridDump, resourceValueBasic } from "./grid";
 import { readInputFile } from "./input-reader";
 import { readResourceFile } from "./resource-reader";
 import { calculateScore } from "./score";
@@ -8,15 +8,20 @@ import { writeOutput } from "./write-output";
 
 const resources: ResourcesData = readResourceFile();
 
-const targets = [2, 3, 4];
+const targets = {
+  1: { resourceCalc: resourceValueBasic, placementCalc: canPlace },
+  2: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat },
+  3: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat },
+  4: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat }
+}
 
-for (const target of targets) {
-  const input = await readInputFile(target);
+for (const [target, funcs] of Object.entries(targets)) {
+  const input = await readInputFile(parseInt(target));
 
   const allowedResource = getAllowedResources(resources, input.available_resources);
 
-  const resultGrid = fillGridDump(input.grid, allowedResource, canPlaceCompat, calculateScore);
+  const resultGrid = fillGridDump(input.grid, allowedResource, canPlaceCompat, funcs.resourceCalc);
 
   console.log(`Score ${target}: ${calculateScore(resultGrid)}`);
-  await writeOutput(target, resultGrid);
+  await writeOutput(parseInt(target), resultGrid);
 };

@@ -61,19 +61,19 @@ export function placeShape(grid: number[][], shape: [number, number][], top: num
   return grid;
 }
 
-const resourceValue = (resource: Resource): number => resource.interest_factor / (resource.orientations[0].cells.length);
+export const resourceValueBasic = (resource: Resource): number => resource.interest_factor / (resource.orientations[0].cells.length);
 
-const prioritizeResources = (resources: Resource[], insertedResources: number[]): Resource[] => {
+const prioritizeResources = (resources: Resource[], insertedResources: number[], resourceCalc: (resource: Resource) => number): Resource[] => {
   const usedResources = resources.filter(r => !insertedResources.includes(r.resource_id));
   const unusedResources = resources.filter(r => insertedResources.includes(r.resource_id));
   unusedResources.sort((a, b) => {
-    const aValue = resourceValue(a);
-    const bValue = resourceValue(b);
+    const aValue = resourceCalc(a);
+    const bValue = resourceCalc(b);
     return bValue - aValue; // Sort descending by value
   });
   usedResources.sort((a, b) => {
-    const aValue = resourceValue(a);
-    const bValue = resourceValue(b);
+    const aValue = resourceCalc(a);
+    const bValue = resourceCalc(b);
     return bValue - aValue; // Sort descending by value
   });
 
@@ -91,7 +91,7 @@ export function fillGridDump(
     left: number,
     resource: Resource
   ) => boolean,
-  calculateScoreFn: (grid: number[][]) => number
+  resourceCalc: (resource: Resource) => number
 ): number[][] {
   // let improved = true;
 
@@ -103,7 +103,7 @@ export function fillGridDump(
   var insertedResources: number[] = [];
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[0].length; x++) {
-      const orderedResources = prioritizeResources(resources, insertedResources);
+      const orderedResources = prioritizeResources(resources, insertedResources, resourceCalc);
       for (const resourceDef of orderedResources) {
         for (const orientation of resourceDef.orientations) {
           if (canPlaceFn(grid, orientation.cells, y, x, resourceDef)) {
