@@ -18,5 +18,5 @@ for (const target of targets) {
   const resultGrid = fillGridDump(input.grid, allowedResource);
 
   console.log(`Score ${target}: ${calculateScore(resultGrid)}`);
-  await writeOutput(1, resultGrid);
+  await writeOutput(target, resultGrid);
 };
