@@ -5,14 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
+            "name": "Launch via NPM",
             "request": "launch",
-            "name": "Run ts-node",
-            "runtimeExecutable": "ts-node",
-            "cwd": "${workspaceFolder}",
-            "args": [
-                "src/index.ts"
+            "runtimeArgs": [
+                "run-script",
+                "start"
             ],
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
         }
     ]
 }
