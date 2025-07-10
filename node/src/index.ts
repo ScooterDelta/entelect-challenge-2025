@@ -1,5 +1,5 @@
 import { getAllowedResources } from "./get-resources";
-import { fillGridDump } from "./grid";
+import { canPlace, fillGridDump } from "./grid";
 import { readInputFile } from "./input-reader";
 import { readResourceFile } from "./resource-reader";
 import { calculateScore } from "./score";
@@ -15,7 +15,7 @@ for (const target of targets) {
 
   const allowedResource = getAllowedResources(resources, input.available_resources);
 
-  const resultGrid = fillGridDump(input.grid, allowedResource);
+  const resultGrid = fillGridDump(input.grid, allowedResource, canPlace, calculateScore);
 
   console.log(`Score ${target}: ${calculateScore(resultGrid)}`);
   await writeOutput(target, resultGrid);
