@@ -63,7 +63,7 @@ export function placeShape(grid: number[][], shape: [number, number][], top: num
 
 export const resourceValueBasic = (resource: Resource): number => resource.interest_factor / (resource.orientations[0].cells.length);
 
-export const minCostResourceValue = (resource: Resource): number => resource.interest_factor / (resource.orientations[0].cells.length + resource.cost);
+export const minCostResourceValue = (resource: Resource): number => resource.interest_factor / (resource.cost);
 
 const prioritizeResources = (resources: Resource[], insertedResources: number[], resourceCalc: (resource: Resource) => number): Resource[] => {
   const usedResources = resources.filter(r => !insertedResources.includes(r.resource_id));
@@ -94,7 +94,7 @@ export function fillGridDump(
     resource: Resource
   ) => boolean,
   resourceCalc: (resource: Resource) => number,
-  limitCost:number
+  spacing: number
 ): number[][] {
   // let improved = true;
 
@@ -102,16 +102,16 @@ export function fillGridDump(
   //   improved = false;
   //   let bestGrid = grid;
   //   let bestScore = calculateScore(grid);
- let  cost = 0;
+  let cost = 0;
   var insertedResources: number[] = [];
-  for (let y = 0; y < grid.length; y++) {
-    for (let x = 0; x < grid[0].length; x++) {
+  for (let y = 0; y < grid.length; y += spacing) {
+    for (let x = 0; x < grid[0].length; x += spacing) {
       const orderedResources = prioritizeResources(resources, insertedResources, resourceCalc);
       for (const resourceDef of orderedResources) {
         for (const orientation of resourceDef.orientations) {
-          if (canPlaceFn(grid, orientation.cells, y, x, resourceDef) && limitCost > cost) {
+          if (canPlaceFn(grid, orientation.cells, y, x, resourceDef)) {
             placeShape(grid, orientation.cells, y, x, resourceDef.resource_id);
-            cost+=resourceDef.cost;
+            cost += resourceDef.cost;
             // Manage inserted resources
             if (!insertedResources.includes(resourceDef.resource_id)) {
               insertedResources.push(resourceDef.resource_id);
