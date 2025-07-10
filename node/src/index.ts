@@ -4,6 +4,7 @@ import { readInputFile } from "./input-reader";
 import { readResourceFile } from "./resource-reader";
 import { calculateScore } from "./score";
 import { ResourcesData } from "./types/resources";
+import { writeOutput } from "./write-output";
 
 const resources: ResourcesData = readResourceFile();
 const input1 = await readInputFile(1);
@@ -15,3 +16,4 @@ const allowedReaources = getAllowedResources(resources, input1.available_resourc
 const resultGrid = fillGridDump(input1.grid, allowedReaources);
 
 console.log(calculateScore(resultGrid));
+await writeOutput(1, resultGrid);
