@@ -7,7 +7,7 @@ const currentDirectory = dirname(fileURLToPath(import.meta.url));
 export const writeOutput = async (challengeId: number, grid: number[][]): Promise<void> => {
   const outputPath = join(currentDirectory, '..', 'output', `${challengeId}.txt`);
 
-  const output = { grid };
+  const output = { zoo: grid };
 
-  await fs.writeFile(outputPath, JSON.stringify(grid, null, 2), 'utf-8');
+  await fs.writeFile(outputPath, JSON.stringify(output, null, 2), 'utf-8');
 }
