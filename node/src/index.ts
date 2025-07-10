@@ -1,5 +1,5 @@
 import { getAllowedResources } from "./get-resources";
-import { canPlace, canPlaceCompat, fillGridDump, resourceValueBasic } from "./grid";
+import { canPlaceCompat, fillGridDump, minCostResourceValue } from "./grid";
 import { readInputFile } from "./input-reader";
 import { readResourceFile } from "./resource-reader";
 import { calculateScore } from "./score";
@@ -9,10 +9,10 @@ import { writeOutput } from "./write-output";
 const resources: ResourcesData = readResourceFile();
 
 const targets = {
-  1: { resourceCalc: resourceValueBasic, placementCalc: canPlace },
-  2: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat },
-  3: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat },
-  4: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat }
+  // 1: { resourceCalc: resourceValueBasic, placementCalc: canPlace },
+  // 2: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat },
+  // 3: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat },
+  4: { resourceCalc: minCostResourceValue, placementCalc: canPlaceCompat }
 }
 
 for (const [target, funcs] of Object.entries(targets)) {
