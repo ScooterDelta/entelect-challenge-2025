@@ -7,10 +7,10 @@ export type Resource =
     cost: number;
     interest_factor: number;
     incompatible_with: number[];
-    orientations: {
+    orientations: [{
         rotation: number;
         cells: [number, number][]
-    }
+    }]
 }
 
 export type ResourcesData =

@@ -16,11 +16,10 @@ export function canPlace(grid: number[][], shape: [number, number][], top: numbe
 }
 
 export function placeShape(grid: number[][], shape: [number, number][], top: number, left: number, resource_id: number): number[][] {
-    const newGrid = grid.map(row => [...row]);
     for (const [dy, dx] of shape) {
-      newGrid[top + dy][left + dx] = resource_id;
+        grid[top + dy][left + dx] = resource_id;
     }
-    return newGrid;
+    return grid;
   }
 
 
@@ -41,22 +40,22 @@ export function scorePlacement(grid: number[][]): number {
       placed = false;
   
       for (const resourceDef of resources) {
-        const orientation = resourceDef.orientations.cells;
-        for (let y = 0; y < grid.length; y++) {
-            for (let x = 0; x < grid[0].length; x++) {
-              if (canPlace(grid, orientation, y, x)) {
-                placeShape(grid, orientation, y, x, resourceDef.resource_id);
-                placedCount++;
-                placed = true;
-                break;
-              }
+        for (const orientation of resourceDef.orientations) {
+            for (let y = 0; y < grid.length; y++) {
+                for (let x = 0; x < grid[0].length; x++) {
+                if (canPlace(grid, orientation.cells, y, x)) {
+                    grid = placeShape(grid, orientation.cells, y, x, resourceDef.resource_id);
+                    placed = true;
+                    break;
+                }
             }
             if (placed) break;
           }
           if (placed) break;
-        if (placed) break;
       }
+      if (placed) break;
+    }
     }
   
-    return { grid, placedCount };
+    return grid;
   }
