@@ -20,7 +20,7 @@ for (const [target, funcs] of Object.entries(targets)) {
 
   const allowedResource = getAllowedResources(resources, input.available_resources);
 
-  const resultGrid = fillGridDump(input.grid, allowedResource, canPlaceCompat, funcs.resourceCalc);
+  const resultGrid = fillGridDump(input.grid, allowedResource, funcs.placementCalc, funcs.resourceCalc);
 
   console.log(`Score ${target}: ${calculateScore(resultGrid)}`);
   await writeOutput(parseInt(target), resultGrid);
