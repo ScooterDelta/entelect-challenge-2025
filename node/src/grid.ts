@@ -23,6 +23,21 @@ export function placeShape(grid: number[][], shape: [number, number][], top: num
   return grid;
 }
 
+const resourceValue = (resource: Resource): number => resource.interest_factor / resource.orientations[0].cells.length;
+
+const prioritizeResources = (grid: number[][], resources: Resource[]): Resource[] => {
+  const usedResourceIds = [...new Set<number>(grid.flat())];
+  const usedResources = resources.filter(r => !usedResourceIds.includes(r.resource_id));
+  const unusedResources = resources.filter(r => !usedResourceIds.includes(r.resource_id));
+  unusedResources.sort((a, b) => {
+    const aValue = resourceValue(a);
+    const bValue = resourceValue(b);
+    return bValue - aValue; // Sort descending by value
+  });
+
+  return [...unusedResources, ...usedResources];
+}
+
 
 export function fillGridDump(
   grid: number[][],
