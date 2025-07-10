@@ -1,4 +1,3 @@
-import { calculateScore } from "./score";
 import { Resource } from "./types/resources";
 
 export function canPlace(grid: number[][], shape: [number, number][], top: number, left: number, resource: Resource): boolean {
@@ -90,34 +89,35 @@ export function fillGridDump(
   ) => boolean,
   calculateScoreFn: (grid: number[][]) => number
 ): number[][] {
-  let improved = true;
+  // let improved = true;
 
-  while (improved) {
-    improved = false;
-    let bestGrid = grid;
-    let bestScore = calculateScore(grid);
+  // while (improved) {
+  //   improved = false;
+  //   let bestGrid = grid;
+  //   let bestScore = calculateScore(grid);
 
-    for (let y = 0; y < grid.length; y++) {
-      for (let x = 0; x < grid[0].length; x++) {
-        for (const resourceDef of resources) {
-          for (const orientation of resourceDef.orientations) {
-            if (canPlaceFn(grid, orientation.cells, y, x, resourceDef)) {
-              const newGrid = placeShape(grid, orientation.cells, y, x, resourceDef.resource_id);
-              const newScore = calculateScoreFn(newGrid);
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[0].length; x++) {
+      var orderedResources = prioritizeResources(grid, resources);
+      for (const resourceDef of orderedResources) {
+        for (const orientation of resourceDef.orientations) {
+          if (canPlaceFn(grid, orientation.cells, y, x, resourceDef)) {
+            placeShape(grid, orientation.cells, y, x, resourceDef.resource_id);
+            // const newScore = calculateScoreFn(newGrid);
 
-              if (newScore > bestScore) {
-                bestScore = newScore;
-                bestGrid = newGrid;
-                improved = true;
-              }
-            }
+            // if (newScore > bestScore) {
+            //   bestScore = newScore;
+            //   bestGrid = newGrid;
+            //   improved = true;
+            // }
           }
         }
       }
     }
-
-    grid = bestGrid;
   }
+
+  //   grid = bestGrid;
+  // }
 
   return grid;
 }
