@@ -8,7 +8,7 @@ import { writeOutput } from "./write-output";
 
 const resources: ResourcesData = readResourceFile();
 
-const targets = [1, 2, 3, 4];
+const targets = [1];
 
 for (const target of targets) {
   const input = await readInputFile(target);

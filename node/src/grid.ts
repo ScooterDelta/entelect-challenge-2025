@@ -61,13 +61,18 @@ export function placeShape(grid: number[][], shape: [number, number][], top: num
   return grid;
 }
 
-const resourceValue = (resource: Resource): number => resource.interest_factor / resource.orientations[0].cells.length;
+const resourceValue = (resource: Resource): number => resource.interest_factor / (resource.orientations[0].cells.length);
 
 const prioritizeResources = (grid: number[][], resources: Resource[]): Resource[] => {
   const usedResourceIds = [...new Set<number>(grid.flat())];
   const usedResources = resources.filter(r => !usedResourceIds.includes(r.resource_id));
-  const unusedResources = resources.filter(r => !usedResourceIds.includes(r.resource_id));
+  const unusedResources = resources.filter(r => usedResourceIds.includes(r.resource_id));
   unusedResources.sort((a, b) => {
+    const aValue = resourceValue(a);
+    const bValue = resourceValue(b);
+    return bValue - aValue; // Sort descending by value
+  });
+  usedResources.sort((a, b) => {
     const aValue = resourceValue(a);
     const bValue = resourceValue(b);
     return bValue - aValue; // Sort descending by value
@@ -98,11 +103,12 @@ export function fillGridDump(
 
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[0].length; x++) {
-      var orderedResources = prioritizeResources(grid, resources);
+      const orderedResources = prioritizeResources(grid, resources);
       for (const resourceDef of orderedResources) {
         for (const orientation of resourceDef.orientations) {
           if (canPlaceFn(grid, orientation.cells, y, x, resourceDef)) {
             placeShape(grid, orientation.cells, y, x, resourceDef.resource_id);
+            console.log(`Placing (${x}, ${y}) with resource ${resourceDef.resource_id} (${resourceDef.name})`);
             // const newScore = calculateScoreFn(newGrid);
 
             // if (newScore > bestScore) {
