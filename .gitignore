@@ -23,9 +23,12 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-output/
 *.zip
 submit.sh
+
+# Submissions
+node/output/*
+!node/output/.gitkeep
 
 # Unit test / coverage reports
 htmlcov/
