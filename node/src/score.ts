@@ -1,3 +1,5 @@
+import { Resource } from "./types/resources";
+
 const calculateSimpsonsIndex = (grid: number[][]): number => {
   const flatGrid = grid.flat();
   // Filter out paths (value 1) to only consider creature types
@@ -35,6 +37,42 @@ const calculateTotalUsableScore = (grid: number[][]): number => calculateTotalCe
 const calculateBalanceMultiplier = (grid: number[][]): number => (calculateUniqueResources(grid) + (1 / calculateSimpsonsIndex(grid))) / 2;
 
 
-export const calculateScore = (grid: number[][]): number => {
+export const calculateScore = (grid: number[][],
+  resources: Resource[],
+  cost: number = 0): number => {
   return calculateTotalUsableScore(grid) * calculateBalanceMultiplier(grid);
 }
+
+export const calculateScoreInterest = (
+  grid: number[][],
+  resources: Resource[],
+  cost: number = 0
+): number => {
+  const flat = grid.flat();
+  const totalPath = flat.filter(cell => cell === 1).length;
+  const totalCells = flat.length;
+  const totalUsable = totalCells - totalPath;
+
+  // Create map of resource_id to interest_factor
+  const interestMap = new Map<number, number>();
+  for (const res of resources) {
+    interestMap.set(res.resource_id, res.interest_factor);
+  }
+
+  // Sum interest of placed resources
+  let totalInterest = 0;
+  for (const cell of flat) {
+    if (cell !== 1 && interestMap.has(cell)) {
+      totalInterest += interestMap.get(cell)!;
+    }
+  }
+
+  // Diversity-related balance
+  const uniqueCount = new Set(flat.filter(v => v !== 1)).size;
+  const simpsonsIndex = calculateSimpsonsIndex(grid);
+  const balanceMultiplier = (uniqueCount + (1 / simpsonsIndex)) / 2;
+
+  // Final score
+  return totalInterest * balanceMultiplier / (1+cost);
+};
+

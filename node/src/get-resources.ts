@@ -5,5 +5,5 @@ export function getAllowedResources(resourceData: ResourcesData, allowedResource
   allowedResources.forEach((allowedResource) => {
     resource.push(resourceData.resources.find(r => r.resource_id === allowedResource) as Resource);
   });
-  return resource;
+  return resource.filter(r => r.resource_id !=1 );
 }

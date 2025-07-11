@@ -136,27 +136,29 @@ export const resourceValueBasic = (resource: Resource): number =>
 
 export const minCostResourceValue = (resource: Resource): number =>
   resource.cost !== 0 ? resource.interest_factor / resource.cost : 0;
-
 const prioritizeResources = (
   resources: Resource[],
   insertedResources: number[],
   resourceCalc: (resource: Resource) => number,
 ): Resource[] => {
   const usedResources = resources.filter(
-    (r) => !insertedResources.includes(r.resource_id),
+    (r) => !insertedResources.includes(r.resource_id)
   );
   const unusedResources = resources.filter((r) =>
-    insertedResources.includes(r.resource_id),
+    insertedResources.includes(r.resource_id)
   );
+
+  // Add randomness with a bias toward higher value
   unusedResources.sort((a, b) => {
-    const aValue = resourceCalc(a);
-    const bValue = resourceCalc(b);
-    return bValue - aValue; // Sort descending by value
+    const aValue = resourceCalc(a) + Math.random() * 0.2;
+    const bValue = resourceCalc(b) + Math.random() * 0.2;
+    return bValue - aValue;
   });
+
   usedResources.sort((a, b) => {
     const aValue = resourceCalc(a);
     const bValue = resourceCalc(b);
-    return bValue - aValue; // Sort descending by value
+    return bValue - aValue;
   });
 
   return [...unusedResources, ...usedResources];
@@ -175,59 +177,101 @@ export function fillGridDump(
   resourceCalc: (resource: Resource) => number,
   spacing: number,
   budget: number,
-  direction: "forward" | "reverse" = "forward" // NEW PARAM
-): number[][] {
+  direction: "forward" | "reverse" | "left" | "right" = "forward" // updated param
+): { grid: number[][]; cost: number } {
   let cost = 0;
   let insertedResources: number[] = [];
 
   const yRange =
-    direction === "forward"
+    direction === "forward" || direction === "left"
       ? [...Array(grid.length).keys()]
       : [...Array(grid.length).keys()].reverse();
 
   const xRange =
-    direction === "forward"
+    direction === "forward" || direction === "right"
       ? [...Array(grid[0].length).keys()]
       : [...Array(grid[0].length).keys()].reverse();
 
-  for (let yi = 0; yi < yRange.length; yi += spacing) {
-    const y = yRange[yi];
+  const iterateByColumn = direction === "left" || direction === "right";
+
+  if (iterateByColumn) {
     for (let xi = 0; xi < xRange.length; xi += spacing) {
       const x = xRange[xi];
+      for (let yi = 0; yi < yRange.length; yi += spacing) {
+        const y = yRange[yi];
 
-      const orderedResources = prioritizeResources(
-        resources,
-        insertedResources,
-        resourceCalc,
-      );
+        const orderedResources = prioritizeResources(
+          resources,
+          insertedResources,
+          resourceCalc,
+        );
 
-      for (const resourceDef of orderedResources) {
-        const scoredOrientations = resourceDef.orientations
-          .map((o) => {
-            const score = canPlaceFn(grid, o.cells, y, x, resourceDef);
-            return { orientation: o, score };
-          })
-          .filter((o) => o.score !== -1)
-          .sort((a, b) => a.score - b.score); // Least unused space first
+        for (const resourceDef of orderedResources) {
+          const scoredOrientations = resourceDef.orientations
+            .map((o) => {
+              const score = canPlaceFn(grid, o.cells, y, x, resourceDef);
+              return { orientation: o, score };
+            })
+            .filter((o) => o.score !== -1)
+            .sort((a, b) => a.score - b.score);
 
-        if (
-          scoredOrientations.length > 0 &&
-          budget >= cost + resourceDef.cost
-        ) {
-          const best = scoredOrientations[0];
-          placeShape(
-            grid,
-            best.orientation.cells,
-            y,
-            x,
-            resourceDef.resource_id,
-          );
-          cost += resourceDef.cost;
+          if (
+            scoredOrientations.length > 0 &&
+            budget >= cost + resourceDef.cost
+          ) {
+            const best = scoredOrientations[0];
+            placeShape(grid, best.orientation.cells, y, x, resourceDef.resource_id);
+            cost += resourceDef.cost;
+            console.log(
+              `Placed resource ${resourceDef.resource_id} at (${y}, ${x}) with cost ${resourceDef.cost}`
+            );
 
-          if (!insertedResources.includes(resourceDef.resource_id)) {
-            insertedResources.push(resourceDef.resource_id);
-            if (insertedResources.length === resources.length) {
-              insertedResources = [];
+            if (!insertedResources.includes(resourceDef.resource_id)) {
+              insertedResources.push(resourceDef.resource_id);
+              if (insertedResources.length === resources.length) {
+                insertedResources = [];
+              }
+            }
+          }
+        }
+      }
+    }
+  } else {
+    for (let yi = 0; yi < yRange.length; yi += spacing) {
+      const y = yRange[yi];
+      for (let xi = 0; xi < xRange.length; xi += spacing) {
+        const x = xRange[xi];
+
+        const orderedResources = prioritizeResources(
+          resources,
+          insertedResources,
+          resourceCalc,
+        );
+
+        for (const resourceDef of orderedResources) {
+          const scoredOrientations = resourceDef.orientations
+            .map((o) => {
+              const score = canPlaceFn(grid, o.cells, y, x, resourceDef);
+              return { orientation: o, score };
+            })
+            .filter((o) => o.score !== -1)
+            .sort((a, b) => a.score - b.score);
+
+          if (
+            scoredOrientations.length > 0 
+          ) {
+            const best = scoredOrientations[0];
+            placeShape(grid, best.orientation.cells, y, x, resourceDef.resource_id);
+            cost += resourceDef.cost;
+            console.log(
+              `Placed resource ${resourceDef.resource_id} at (${y}, ${x}) with cost ${resourceDef.cost}`
+            );
+
+            if (!insertedResources.includes(resourceDef.resource_id)) {
+              insertedResources.push(resourceDef.resource_id);
+              if (insertedResources.length === resources.length) {
+                insertedResources = [];
+              }
             }
           }
         }
@@ -236,53 +280,5 @@ export function fillGridDump(
   }
 
   console.log(`Total cost: ${cost}`);
-  return grid;
-}
-
-
-export function fillGridGreedy(
-  grid: number[][],
-  resources: Resource[],
-  canPlaceFn: (
-    grid: number[][],
-    shape: [number, number][],
-    top: number,
-    left: number,
-    resource: Resource,
-  ) => number,
-  resourceCalc: (resource: Resource) => number,
-  spacing: number,
-  budget: number,
-): number[][] {
-  let cost = 0;
-  var insertedResources: number[] = [];
-  for (let y = 0; y < grid.length; y += spacing) {
-    for (let x = 0; x < grid[0].length; x += spacing) {
-      const orderedResources = prioritizeResources(
-        resources,
-        insertedResources,
-        resourceCalc,
-      );
-      for (const resourceDef of orderedResources) {
-        for (const orientation of resourceDef.orientations) {
-          if (
-            budget > cost &&
-            canPlaceFn(grid, orientation.cells, y, x, resourceDef)
-          ) {
-            placeShape(grid, orientation.cells, y, x, resourceDef.resource_id);
-            cost += resourceDef.cost;
-            // Manage inserted resources
-            /*if (!insertedResources.includes(resourceDef.resource_id)) {
-              insertedResources.push(resourceDef.resource_id);
-              if (insertedResources.length == resources.length)
-                insertedResources = [];
-            }*/
-          }
-        }
-      }
-    }
-  }
-
-  console.log(`Total cost: ${cost}`);
-  return grid;
+  return { grid, cost };
 }
