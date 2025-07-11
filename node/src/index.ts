@@ -9,10 +9,10 @@ import { writeOutput } from "./write-output";
 const resources: ResourcesData = readResourceFile();
 
 const targets = {
-  1: { resourceCalc: resourceValueBasic, placementCalc: canPlace, limit: 9999999999999999, spacing: 1 },
-  2: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat, limit: 9999999999999999, spacing: 1 },
-  3: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat, limit: 9999999999999999, spacing: 1 },
-  4: { resourceCalc: minCostResourceValue, placementCalc: canPlaceCompat, limit: 100000000, spacing: 1 }
+  1: { resourceCalc: resourceValueBasic, placementCalc: canPlace, spacing: 1 },
+  2: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat, spacing: 1 },
+  3: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompat, spacing: 1 },
+  4: { resourceCalc: minCostResourceValue, placementCalc: canPlaceCompat, spacing: 1 }
 }
 
 for (const [target, funcs] of Object.entries(targets)) {
