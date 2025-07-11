@@ -63,7 +63,7 @@ export function placeShape(grid: number[][], shape: [number, number][], top: num
 
 export const resourceValueBasic = (resource: Resource): number => resource.interest_factor / (resource.orientations[0].cells.length);
 
-export const minCostResourceValue = (resource: Resource): number => resource.interest_factor / (resource.cost);
+export const minCostResourceValue = (resource: Resource): number => resource.cost !== 0 ? resource.interest_factor / (resource.cost) : 0;
 
 const prioritizeResources = (resources: Resource[], insertedResources: number[], resourceCalc: (resource: Resource) => number): Resource[] => {
   const usedResources = resources.filter(r => !insertedResources.includes(r.resource_id));
