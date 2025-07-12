@@ -97,8 +97,8 @@ export function canPlaceCompatUnUsedValue(
     }
   }
   let unUsed = 0;
-  for (let dy2 = 0; dy2 <= resource.bounding_box; dy2++) {
-    for (let dx2 = 0; dx2 <= resource.bounding_box; dx2++) {
+  for (let dy2 = -3; dy2 <= resource.bounding_box+6; dy2++) {
+    for (let dx2 = -3; dx2 <= resource.bounding_box+6; dx2++) {
       const ny = top + dy2;
       const nx = left + dx2;
       if (
@@ -128,30 +128,38 @@ export function placeShape(
   }
   return grid;
 }
-export const resourceValueBase = (resource: Resource): number =>1;
-export const resourceValueInterest = (resource: Resource): number =>
-  resource.interest_factor;
-export const resourceValueBasic = (resource: Resource): number =>
-  resource.interest_factor / resource.orientations[0].cells.length;
+export const resourceValueBase = (resource: Resource): number =>
+  Math.random() / resource.orientations[0].cells.length;
 
-export const minCostResourceValue = (resource: Resource): number =>
-  resource.cost !== 0 ? resource.interest_factor / resource.cost : 0;
+export const resourceValueBasic = (resource: Resource): number => {
+  return (
+    (resource.interest_factor * (Math.random() * 0.1)) /
+    resource.orientations[0].cells.length
+  );
+};
+
+export const minCostResourceValue = (resource: Resource): number => {
+  return resource.cost !== 0
+    ? (resource.interest_factor * (Math.random() * 0.1)) /
+        (resource.cost / 10000)
+    : 0;
+};
 const prioritizeResources = (
   resources: Resource[],
   insertedResources: number[],
   resourceCalc: (resource: Resource) => number,
 ): Resource[] => {
   const usedResources = resources.filter(
-    (r) => !insertedResources.includes(r.resource_id)
+    (r) => !insertedResources.includes(r.resource_id),
   );
   const unusedResources = resources.filter((r) =>
-    insertedResources.includes(r.resource_id)
+    insertedResources.includes(r.resource_id),
   );
 
   // Add randomness with a bias toward higher value
   unusedResources.sort((a, b) => {
-    const aValue = resourceCalc(a) + Math.random() * 0.2;
-    const bValue = resourceCalc(b) + Math.random() * 0.2;
+    const aValue = resourceCalc(a);
+    const bValue = resourceCalc(b);
     return bValue - aValue;
   });
 
@@ -177,7 +185,7 @@ export function fillGridDump(
   resourceCalc: (resource: Resource) => number,
   spacing: number,
   budget: number,
-  direction: "forward" | "reverse" | "left" | "right" = "forward" // updated param
+  direction: "forward" | "reverse" | "left" | "right" = "forward", // updated param
 ): { grid: number[][]; cost: number } {
   let cost = 0;
   let insertedResources: number[] = [];
@@ -197,6 +205,7 @@ export function fillGridDump(
   if (iterateByColumn) {
     for (let xi = 0; xi < xRange.length; xi += spacing) {
       const x = xRange[xi];
+      console.log(`Processing column: ${x}`);
       for (let yi = 0; yi < yRange.length; yi += spacing) {
         const y = yRange[yi];
 
@@ -215,16 +224,16 @@ export function fillGridDump(
             .filter((o) => o.score !== -1)
             .sort((a, b) => a.score - b.score);
 
-          if (
-            scoredOrientations.length > 0 &&
-            budget >= cost + resourceDef.cost
-          ) {
+          if (scoredOrientations.length > 0) {
             const best = scoredOrientations[0];
-            placeShape(grid, best.orientation.cells, y, x, resourceDef.resource_id);
-            cost += resourceDef.cost;
-            console.log(
-              `Placed resource ${resourceDef.resource_id} at (${y}, ${x}) with cost ${resourceDef.cost}`
+            placeShape(
+              grid,
+              best.orientation.cells,
+              y,
+              x,
+              resourceDef.resource_id,
             );
+            cost += resourceDef.cost;
 
             if (!insertedResources.includes(resourceDef.resource_id)) {
               insertedResources.push(resourceDef.resource_id);
@@ -239,6 +248,7 @@ export function fillGridDump(
   } else {
     for (let yi = 0; yi < yRange.length; yi += spacing) {
       const y = yRange[yi];
+      console.log(`Processing column: ${y}`);
       for (let xi = 0; xi < xRange.length; xi += spacing) {
         const x = xRange[xi];
 
@@ -257,15 +267,16 @@ export function fillGridDump(
             .filter((o) => o.score !== -1)
             .sort((a, b) => a.score - b.score);
 
-          if (
-            scoredOrientations.length > 0 
-          ) {
+          if (scoredOrientations.length > 0) {
             const best = scoredOrientations[0];
-            placeShape(grid, best.orientation.cells, y, x, resourceDef.resource_id);
-            cost += resourceDef.cost;
-            console.log(
-              `Placed resource ${resourceDef.resource_id} at (${y}, ${x}) with cost ${resourceDef.cost}`
+            placeShape(
+              grid,
+              best.orientation.cells,
+              y,
+              x,
+              resourceDef.resource_id,
             );
+            cost += resourceDef.cost;
 
             if (!insertedResources.includes(resourceDef.resource_id)) {
               insertedResources.push(resourceDef.resource_id);
