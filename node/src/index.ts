@@ -1,21 +1,43 @@
 import { getAllowedResources } from "./get-resources";
 import {
+  canPlace,
+  canPlaceCompat,
   canPlaceCompatUnUsedValue,
   fillGridDump,
   minCostResourceValue,
+  resourceValueBase,
+  resourceValueBasic,
 } from "./grid2";
 import { readInputFile } from "./input-reader";
 import { readResourceFile } from "./resource-reader";
-import { calculateScoreInterest } from "./score";
+import { calculateScore, calculateScoreInterest } from "./score";
 import { ResourcesData } from "./types/resources";
 import { writeOutput } from "./write-output";
 
 const resources: ResourcesData = readResourceFile();
 
 const targets = {
-  //1: {resourceCalc: resourceValueBase,placementCalc: canPlace,spacing: 1,budget: 999999999999999,},
-  //2: { resourceCalc: resourceValueBase, placementCalc: canPlaceCompat,spacing: 1, budget: 999999999999999,},
-  //3: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompatUnUsedValue, spacing: 1, budget: 9999999999999999, scoreCalc: calculateScoreInterest   },
+  1: {
+    resourceCalc: resourceValueBase,
+    placementCalc: canPlace,
+    spacing: 1,
+    budget: 999999999999999,
+    scoreCalc: calculateScore,
+  },
+  2: {
+    resourceCalc: resourceValueBase,
+    placementCalc: canPlaceCompat,
+    spacing: 1,
+    budget: 999999999999999,
+    scoreCalc: calculateScore,
+  },
+  3: {
+    resourceCalc: resourceValueBasic,
+    placementCalc: canPlaceCompatUnUsedValue,
+    spacing: 1,
+    budget: 9999999999999999,
+    scoreCalc: calculateScoreInterest,
+  },
   4: {
     resourceCalc: minCostResourceValue,
     placementCalc: canPlaceCompatUnUsedValue,

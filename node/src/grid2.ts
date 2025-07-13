@@ -1,5 +1,33 @@
 import { Resource } from "./types/resources";
 
+const checkSameResource = (
+  grid: number[][],
+  top: number,
+  left: number,
+  resource: Resource,
+): boolean => {
+  if (top >= 0 || top < grid.length || left >= 0 || left < grid[0].length)
+    return grid[top][left] === resource.resource_id;
+  return false;
+};
+
+const adjacentSameResource = (
+  grid: number[][],
+  top: number,
+  left: number,
+  resource: Resource,
+) => {
+  if (
+    checkSameResource(grid, top - 1, left, resource) &&
+    checkSameResource(grid, top + 1, left, resource) &&
+    checkSameResource(grid, top, left - 1, resource) &&
+    checkSameResource(grid, top, left + 1, resource)
+  ) {
+    return true;
+  }
+  return false;
+};
+
 export function canPlace(
   grid: number[][],
   shape: [number, number][],
@@ -15,7 +43,8 @@ export function canPlace(
       y >= grid.length ||
       x < 0 ||
       x >= grid[0].length ||
-      grid[y][x] !== 1
+      grid[y][x] !== 1 ||
+      !adjacentSameResource(grid, y, x, resource)
     ) {
       return -1;
     }
@@ -39,7 +68,8 @@ export function canPlaceCompat(
       y >= grid.length ||
       x < 0 ||
       x >= grid[0].length ||
-      grid[y][x] !== 1
+      grid[y][x] !== 1 ||
+      !adjacentSameResource(grid, y, x, resource)
     ) {
       return -1;
     }
