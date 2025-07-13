@@ -6,7 +6,7 @@ const checkSameResource = (
   left: number,
   resource: Resource,
 ): boolean => {
-  if (top >= 0 || top < grid.length || left >= 0 || left < grid[0].length)
+  if (top >= 0 && top < grid.length && left >= 0 && left < grid[0].length)
     return grid[top][left] === resource.resource_id;
   return false;
 };
