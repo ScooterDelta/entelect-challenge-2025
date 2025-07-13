@@ -3,7 +3,7 @@ import { Resource } from "./types/resources";
 const calculateSimpsonsIndex = (grid: number[][]): number => {
   const flatGrid = grid.flat();
   // Filter out paths (value 1) to only consider creature types
-  const creatures = flatGrid.filter(cell => cell !== 1);
+  const creatures = flatGrid.filter((cell) => cell !== 1);
 
   if (creatures.length === 0) {
     return 1; // No diversity if no creatures
@@ -11,7 +11,7 @@ const calculateSimpsonsIndex = (grid: number[][]): number => {
 
   // Count occurrences of each creature type
   const typeCounts = new Map<number, number>();
-  creatures.forEach(type => {
+  creatures.forEach((type) => {
     typeCounts.set(type, (typeCounts.get(type) || 0) + 1);
   });
 
@@ -19,7 +19,7 @@ const calculateSimpsonsIndex = (grid: number[][]): number => {
 
   // Calculate Simpson's Index: D = Σ(n(n-1)) / (N(N-1))
   let sumNiNiMinus1 = 0;
-  typeCounts.forEach(count => {
+  typeCounts.forEach((count) => {
     sumNiNiMinus1 += count * (count - 1);
   });
 
@@ -29,27 +29,33 @@ const calculateSimpsonsIndex = (grid: number[][]): number => {
 
   return sumNiNiMinus1 / (totalCreatures * (totalCreatures - 1));
 };
-const calculateUniqueResources = (grid: number[][]): number => [...new Set(grid.flat().filter(s => s != 1))].length;
-const calculateTotalCellsInGrid = (grid: number[][]): number => grid.flat().length;
-const calculateTotalPathArea = (grid: number[][]): number => grid.flat().filter(s => s === 1).length;
+const calculateUniqueResources = (grid: number[][]): number =>
+  [...new Set(grid.flat().filter((s) => s != 1))].length;
+const calculateTotalCellsInGrid = (grid: number[][]): number =>
+  grid.flat().length;
+const calculateTotalPathArea = (grid: number[][]): number =>
+  grid.flat().filter((s) => s === 1).length;
 
-const calculateTotalUsableScore = (grid: number[][]): number => calculateTotalCellsInGrid(grid) - calculateTotalPathArea(grid);
-const calculateBalanceMultiplier = (grid: number[][]): number => (calculateUniqueResources(grid) + (1 / calculateSimpsonsIndex(grid))) / 2;
+const calculateTotalUsableScore = (grid: number[][]): number =>
+  calculateTotalCellsInGrid(grid) - calculateTotalPathArea(grid);
+const calculateBalanceMultiplier = (grid: number[][]): number =>
+  (calculateUniqueResources(grid) + 1 / calculateSimpsonsIndex(grid)) / 2;
 
-
-export const calculateScore = (grid: number[][],
+export const calculateScore = (
+  grid: number[][],
   resources: Resource[],
-  cost: number = 0): number => {
+  cost: number = 0,
+): number => {
   return calculateTotalUsableScore(grid) * calculateBalanceMultiplier(grid);
-}
+};
 
 export const calculateScoreInterest = (
   grid: number[][],
   resources: Resource[],
-  cost: number = 0
+  cost: number = 0,
 ): number => {
   const flat = grid.flat();
-  const totalPath = flat.filter(cell => cell === 1).length;
+  const totalPath = flat.filter((cell) => cell === 1).length;
   const totalCells = flat.length;
   const totalUsable = totalCells - totalPath;
 
@@ -68,11 +74,10 @@ export const calculateScoreInterest = (
   }
 
   // Diversity-related balance
-  const uniqueCount = new Set(flat.filter(v => v !== 1)).size;
+  const uniqueCount = new Set(flat.filter((v) => v !== 1)).size;
   const simpsonsIndex = calculateSimpsonsIndex(grid);
-  const balanceMultiplier = (uniqueCount + (1 / simpsonsIndex)) / 2;
+  const balanceMultiplier = (uniqueCount + 1 / simpsonsIndex) / 2;
 
   // Final score
-  return totalInterest * balanceMultiplier / (1+cost);
+  return (totalInterest * balanceMultiplier) / (1 + cost);
 };
-

@@ -6,5 +6,10 @@ import { ResourcesData } from "./types/resources";
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 
 export const readResourceFile = (): ResourcesData => {
-  return JSON.parse(readFileSync(join(currentDirectory, "..", "input", "resources.json"), "utf-8"))
-}
+  return JSON.parse(
+    readFileSync(
+      join(currentDirectory, "..", "input", "resources.json"),
+      "utf-8",
+    ),
+  );
+};

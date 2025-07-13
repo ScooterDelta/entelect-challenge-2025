@@ -1,7 +1,7 @@
-import fs from 'fs/promises';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
-import { Challenge } from './types/grid';
+import fs from "fs/promises";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+import { Challenge } from "./types/grid";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 
@@ -20,23 +20,34 @@ const createGrid = (rows: number, cols: number): number[][] => {
   return grid;
 };
 
-export const readInputFile = async (challengeId: number): Promise<Challenge> => {
-  const challengePath = join(currentDirectory, '..', 'input', `${challengeId}.txt`);
-  const file = await fs.readFile(challengePath, 'utf-8');
+export const readInputFile = async (
+  challengeId: number,
+): Promise<Challenge> => {
+  const challengePath = join(
+    currentDirectory,
+    "..",
+    "input",
+    `${challengeId}.txt`,
+  );
+  const file = await fs.readFile(challengePath, "utf-8");
 
   const gridSize = [...file.matchAll(zooSize)][0];
   const resourcesNumbers = [...file.matchAll(resources)][0];
 
   if (!resourcesNumbers)
-    throw new Error(`Available resources not found in challenge file: ${challengePath}`);
+    throw new Error(
+      `Available resources not found in challenge file: ${challengePath}`,
+    );
   if (!gridSize)
     throw new Error(`Zoo size not found in challenge file: ${challengePath}`);
 
   const parsedGridSize = [parseInt(gridSize[1]), parseInt(gridSize[2])];
   return {
     grid: createGrid(parsedGridSize[0], parsedGridSize[1]),
-    available_resources: resourcesNumbers[1].split(', ').map((r) => parseInt(r)),
+    available_resources: resourcesNumbers[1]
+      .split(", ")
+      .map((r) => parseInt(r)),
     zoo_size: parsedGridSize,
-    challenge_id: challengeId
-  }
-}
+    challenge_id: challengeId,
+  };
+};

@@ -1,12 +1,20 @@
 import { Resource } from "./types/resources";
 
-export function canPlace(grid: number[][], shape: [number, number][], top: number, left: number, resource: Resource): boolean {
+export function canPlace(
+  grid: number[][],
+  shape: [number, number][],
+  top: number,
+  left: number,
+  resource: Resource,
+): boolean {
   for (const [dy, dx] of shape) {
     const y = top + dy;
     const x = left + dx;
     if (
-      y < 0 || y >= grid.length ||
-      x < 0 || x >= grid[0].length ||
+      y < 0 ||
+      y >= grid.length ||
+      x < 0 ||
+      x >= grid[0].length ||
       grid[y][x] !== 1
     ) {
       return false;
@@ -27,8 +35,10 @@ export function canPlaceCompat(
     const y = top + dy;
     const x = left + dx;
     if (
-      y < 0 || y >= grid.length ||
-      x < 0 || x >= grid[0].length ||
+      y < 0 ||
+      y >= grid.length ||
+      x < 0 ||
+      x >= grid[0].length ||
       grid[y][x] !== 1
     ) {
       return false;
@@ -38,10 +48,7 @@ export function canPlaceCompat(
       for (let dx2 = -5; dx2 <= 5; dx2++) {
         const ny = y + dy2;
         const nx = x + dx2;
-        if (
-          ny >= 0 && ny < grid.length &&
-          nx >= 0 && nx < grid[0].length
-        ) {
+        if (ny >= 0 && ny < grid.length && nx >= 0 && nx < grid[0].length) {
           const nearby = grid[ny][nx];
           if (incompatibleWith.includes(nearby)) {
             return false;
@@ -54,20 +61,36 @@ export function canPlaceCompat(
   return true;
 }
 
-export function placeShape(grid: number[][], shape: [number, number][], top: number, left: number, resource_id: number): number[][] {
+export function placeShape(
+  grid: number[][],
+  shape: [number, number][],
+  top: number,
+  left: number,
+  resource_id: number,
+): number[][] {
   for (const [dy, dx] of shape) {
     grid[top + dy][left + dx] = resource_id;
   }
   return grid;
 }
 
-export const resourceValueBasic = (resource: Resource): number => resource.interest_factor / (resource.orientations[0].cells.length);
+export const resourceValueBasic = (resource: Resource): number =>
+  resource.interest_factor / resource.orientations[0].cells.length;
 
-export const minCostResourceValue = (resource: Resource): number => resource.cost !== 0 ? resource.interest_factor / (resource.cost) : 0;
+export const minCostResourceValue = (resource: Resource): number =>
+  resource.cost !== 0 ? resource.interest_factor / resource.cost : 0;
 
-const prioritizeResources = (resources: Resource[], insertedResources: number[], resourceCalc: (resource: Resource) => number): Resource[] => {
-  const usedResources = resources.filter(r => !insertedResources.includes(r.resource_id));
-  const unusedResources = resources.filter(r => insertedResources.includes(r.resource_id));
+const prioritizeResources = (
+  resources: Resource[],
+  insertedResources: number[],
+  resourceCalc: (resource: Resource) => number,
+): Resource[] => {
+  const usedResources = resources.filter(
+    (r) => !insertedResources.includes(r.resource_id),
+  );
+  const unusedResources = resources.filter((r) =>
+    insertedResources.includes(r.resource_id),
+  );
   unusedResources.sort((a, b) => {
     const aValue = resourceCalc(a);
     const bValue = resourceCalc(b);
@@ -80,8 +103,7 @@ const prioritizeResources = (resources: Resource[], insertedResources: number[],
   });
 
   return [...unusedResources, ...usedResources];
-}
-
+};
 
 export function fillGridDump(
   grid: number[][],
@@ -91,10 +113,10 @@ export function fillGridDump(
     shape: [number, number][],
     top: number,
     left: number,
-    resource: Resource
+    resource: Resource,
   ) => boolean,
   resourceCalc: (resource: Resource) => number,
-  spacing: number
+  spacing: number,
 ): number[][] {
   // let improved = true;
 
@@ -106,7 +128,11 @@ export function fillGridDump(
   var insertedResources: number[] = [];
   for (let y = 0; y < grid.length; y += spacing) {
     for (let x = 0; x < grid[0].length; x += spacing) {
-      const orderedResources = prioritizeResources(resources, insertedResources, resourceCalc);
+      const orderedResources = prioritizeResources(
+        resources,
+        insertedResources,
+        resourceCalc,
+      );
       for (const resourceDef of orderedResources) {
         for (const orientation of resourceDef.orientations) {
           if (canPlaceFn(grid, orientation.cells, y, x, resourceDef)) {

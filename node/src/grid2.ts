@@ -128,7 +128,7 @@ export function placeShape(
   }
   return grid;
 }
-export const resourceValueBase = (resource: Resource): number =>1;
+export const resourceValueBase = (resource: Resource): number => 1;
 export const resourceValueInterest = (resource: Resource): number =>
   resource.interest_factor;
 export const resourceValueBasic = (resource: Resource): number =>
@@ -142,10 +142,10 @@ const prioritizeResources = (
   resourceCalc: (resource: Resource) => number,
 ): Resource[] => {
   const usedResources = resources.filter(
-    (r) => !insertedResources.includes(r.resource_id)
+    (r) => !insertedResources.includes(r.resource_id),
   );
   const unusedResources = resources.filter((r) =>
-    insertedResources.includes(r.resource_id)
+    insertedResources.includes(r.resource_id),
   );
 
   // Add randomness with a bias toward higher value
@@ -177,7 +177,7 @@ export function fillGridDump(
   resourceCalc: (resource: Resource) => number,
   spacing: number,
   budget: number,
-  direction: "forward" | "reverse" | "left" | "right" = "forward" // updated param
+  direction: "forward" | "reverse" | "left" | "right" = "forward", // updated param
 ): { grid: number[][]; cost: number } {
   let cost = 0;
   let insertedResources: number[] = [];
@@ -220,10 +220,16 @@ export function fillGridDump(
             budget >= cost + resourceDef.cost
           ) {
             const best = scoredOrientations[0];
-            placeShape(grid, best.orientation.cells, y, x, resourceDef.resource_id);
+            placeShape(
+              grid,
+              best.orientation.cells,
+              y,
+              x,
+              resourceDef.resource_id,
+            );
             cost += resourceDef.cost;
             console.log(
-              `Placed resource ${resourceDef.resource_id} at (${y}, ${x}) with cost ${resourceDef.cost}`
+              `Placed resource ${resourceDef.resource_id} at (${y}, ${x}) with cost ${resourceDef.cost}`,
             );
 
             if (!insertedResources.includes(resourceDef.resource_id)) {
@@ -257,14 +263,18 @@ export function fillGridDump(
             .filter((o) => o.score !== -1)
             .sort((a, b) => a.score - b.score);
 
-          if (
-            scoredOrientations.length > 0 
-          ) {
+          if (scoredOrientations.length > 0) {
             const best = scoredOrientations[0];
-            placeShape(grid, best.orientation.cells, y, x, resourceDef.resource_id);
+            placeShape(
+              grid,
+              best.orientation.cells,
+              y,
+              x,
+              resourceDef.resource_id,
+            );
             cost += resourceDef.cost;
             console.log(
-              `Placed resource ${resourceDef.resource_id} at (${y}, ${x}) with cost ${resourceDef.cost}`
+              `Placed resource ${resourceDef.resource_id} at (${y}, ${x}) with cost ${resourceDef.cost}`,
             );
 
             if (!insertedResources.includes(resourceDef.resource_id)) {

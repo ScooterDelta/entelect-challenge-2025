@@ -1,17 +1,12 @@
 import { getAllowedResources } from "./get-resources";
 import {
-  canPlace,
-  canPlaceCompat,
   canPlaceCompatUnUsedValue,
   fillGridDump,
   minCostResourceValue,
-  resourceValueBase,
-  resourceValueBasic,
-  resourceValueInterest,
 } from "./grid2";
 import { readInputFile } from "./input-reader";
 import { readResourceFile } from "./resource-reader";
-import { calculateScore, calculateScoreInterest } from "./score";
+import { calculateScoreInterest } from "./score";
 import { ResourcesData } from "./types/resources";
 import { writeOutput } from "./write-output";
 
@@ -21,7 +16,13 @@ const targets = {
   //1: {resourceCalc: resourceValueBase,placementCalc: canPlace,spacing: 1,budget: 999999999999999,},
   //2: { resourceCalc: resourceValueBase, placementCalc: canPlaceCompat,spacing: 1, budget: 999999999999999,},
   //3: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompatUnUsedValue, spacing: 1, budget: 9999999999999999, scoreCalc: calculateScoreInterest   },
-  4: { resourceCalc: minCostResourceValue,placementCalc: canPlaceCompatUnUsedValue, spacing: 1, budget: 1200000000, scoreCalc: calculateScoreInterest },        
+  4: {
+    resourceCalc: minCostResourceValue,
+    placementCalc: canPlaceCompatUnUsedValue,
+    spacing: 1,
+    budget: 1200000000,
+    scoreCalc: calculateScoreInterest,
+  },
 };
 
 for (const [target, funcs] of Object.entries(targets)) {
@@ -53,7 +54,11 @@ for (const [target, funcs] of Object.entries(targets)) {
       funcs.budget,
       "left",
     );
-    const score = funcs.scoreCalc(resultGrid.grid, allowedResource, target == '4' ? resultGrid.cost:0 );
+    const score = funcs.scoreCalc(
+      resultGrid.grid,
+      allowedResource,
+      target == "4" ? resultGrid.cost : 0,
+    );
     if (score > bestScore) {
       bestScore = score;
       bestGrid = resultGrid.grid;
