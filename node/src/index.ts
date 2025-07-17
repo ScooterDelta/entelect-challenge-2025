@@ -1,8 +1,8 @@
 import { getAllowedResources } from "./get-resources";
 import {
   canPlace,
-  canPlaceCompat,
   canPlaceCompatUnUsedValue,
+  fillGridBeamSearch,
   fillGridDump,
   minCostResourceValue,
   resourceValueBase,
@@ -30,56 +30,93 @@ type TargetConfig = {
   scoreCalc: (
     grid: number[][],
     resources: any,
-    cost?: number
+    addedResources: number[],
+    cost?: number,
   ) => number;
 };
 
-const targets = {
-  //1: {resourceCalc: resourceValueBase,placementCalc: canPlace,spacing: 1,budget: 999999999999999, scoreCalc: calculateScore},
-  //2: { resourceCalc: resourceValueBase, placementCalc: canPlaceCompat,spacing: 1, budget: 999999999999999, scoreCalc: calculateScore},
-  3: { resourceCalc: resourceValueBasic, placementCalc: canPlaceCompatUnUsedValue, spacing: 1, budget: 9999999999999999, scoreCalc: calculateScoreInterest   },
-  4: { resourceCalc: minCostResourceValue,placementCalc: canPlaceCompatUnUsedValue, spacing: 1, budget: 1200000000, scoreCalc: calculateScoreInterest },        
+const targets: Record<number, TargetConfig> = {
+  2: {
+    resourceCalc: resourceValueBase,
+    placementCalc: canPlaceCompatUnUsedValue,
+    spacing: 1,
+    budget: 999999999999999,
+    scoreCalc: calculateScore,
+  },
+  3: {
+    resourceCalc: resourceValueBasic,
+    placementCalc: canPlaceCompatUnUsedValue,
+    spacing: 1,
+    budget: 9999999999999999,
+    scoreCalc: calculateScoreInterest,
+  },
+  4: {
+    resourceCalc: minCostResourceValue,
+    placementCalc: canPlaceCompatUnUsedValue,
+    spacing: 1,
+    budget: 1200000000,
+    scoreCalc: calculateScoreInterest,
+  },
 };
 
 for (const [targetStr, funcs] of Object.entries(targets)) {
   const target = parseInt(targetStr);
   const input = await readInputFile(target);
-  const allowedResource = getAllowedResources(resources, input.available_resources);
+  const allowedResource = getAllowedResources(
+    resources,
+    input.available_resources
+  );
 
-  const attempts = Array.from({ length: 1000 }, (_, i) => i).map(async (i) => {
-    const firstPass = fillGridDump(
+  let bestScore = -Infinity;
+  let bestGrid = input.grid;
+
+  const runCount = 1;
+  const saveInterval = 1;
+
+  for (let i = 0; i < runCount; i++) {
+    console.log(`Attempt ${i + 1}/${runCount}`);
+
+    /*const firstPass = fillGridDump(
       structuredClone(input.grid),
       allowedResource,
       funcs.placementCalc,
       funcs.resourceCalc,
+      funcs.scoreCalc,
       funcs.spacing,
       funcs.budget,
       "forward"
     );
-
-    const secondPass = fillGridDump(
-      structuredClone(firstPass.grid),
+*/
+const firstPass = fillGridBeamSearch(
+      structuredClone(input.grid),
       allowedResource,
       funcs.placementCalc,
       funcs.resourceCalc,
+      funcs.scoreCalc,
       funcs.spacing,
       funcs.budget,
-      "left"
+      2,
     );
-
+    
     const score = funcs.scoreCalc(
-      secondPass.grid,
+      firstPass.grid,
       allowedResource,
-      target === 4 ? secondPass.cost : undefined
+      firstPass.addedResources,
+      target === 4 ? firstPass.cost : undefined,
     );
 
-    console.log(`Run ${i + 1}: Score = ${score}`);
-    return { score, grid: secondPass.grid };
-  });
+    console.log(`Run ${i + 1}: Score = ${score} `);
 
-  const results = await Promise.all(attempts);
-  const best = results.reduce((a, b) => (b.score > a.score ? b : a));
+    if (score > bestScore) {
+      bestScore = score;
+      bestGrid = firstPass.grid;
+    }
+     if ((i + 1) % saveInterval === 0) {
+        console.log(`⬆️ New best at attempt ${i + 1}: Score = ${bestScore}`);
+        await writeOutput(target,i, bestGrid);
+      }
+  }
 
-  console.log(`Final Best Score for Target ${target}: ${best.score}`);
-  await writeOutput(target, best.grid);
-}  
+  console.log(`🏁 Final Best Score for Target ${target}: ${bestScore}`);
+  await writeOutput(target, 0, bestGrid);
+}

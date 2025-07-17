@@ -4,8 +4,8 @@ import { fileURLToPath } from 'url';
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 
-export const writeOutput = async (challengeId: number, grid: number[][]): Promise<void> => {
-  const outputPath = join(currentDirectory, '..', 'output', `${challengeId}.txt`);
+export const writeOutput = async (challengeId: number, attempt:number, grid: number[][]): Promise<void> => {
+  const outputPath = join(currentDirectory, '..', 'output', `${challengeId}.${attempt}.txt`);
 
   const output = { zoo: grid };
 

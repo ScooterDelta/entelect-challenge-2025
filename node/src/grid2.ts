@@ -113,7 +113,7 @@ export function canPlaceCompatUnUsedValue(
     }
   }
 
-  return unUsed;
+  return 1/(unUsed+1);
 }
 
 export function placeShape(
@@ -133,14 +133,14 @@ export const resourceValueBase = (resource: Resource): number =>
 
 export const resourceValueBasic = (resource: Resource): number => {
   return (
-    (resource.interest_factor * (Math.random() * 0.1)) /
+    (resource.interest_factor * (Math.random() * 0.2)) /
     resource.orientations[0].cells.length
   );
 };
 
 export const minCostResourceValue = (resource: Resource): number => {
   return resource.cost !== 0
-    ? (resource.interest_factor * (Math.random() * 0.1)) /
+    ? (resource.interest_factor * (Math.random() * 0.2)) /
         (resource.cost / 10000)
     : 0;
 };
@@ -183,13 +183,18 @@ export function fillGridDump(
     resource: Resource,
   ) => number,
   resourceCalc: (resource: Resource) => number,
+  calculateScore: (grid: number[][],
+  resources: Resource[],
+  addedResources: number[],
+  cost: number) => number,
   spacing: number,
   budget: number,
   direction: "forward" | "reverse" | "left" | "right" = "forward", // updated param
-): { grid: number[][]; cost: number } {
+): { grid: number[][]; cost: number, addedResources: number[] } {
   let cost = 0;
   let insertedResources: number[] = [];
 
+  let addedResources: number[] = [];
   const yRange =
     direction === "forward" || direction === "left"
       ? [...Array(grid.length).keys()]
@@ -205,7 +210,6 @@ export function fillGridDump(
   if (iterateByColumn) {
     for (let xi = 0; xi < xRange.length; xi += spacing) {
       const x = xRange[xi];
-      console.log(`Processing column: ${x}`);
       for (let yi = 0; yi < yRange.length; yi += spacing) {
         const y = yRange[yi];
 
@@ -237,8 +241,9 @@ export function fillGridDump(
 
             if (!insertedResources.includes(resourceDef.resource_id)) {
               insertedResources.push(resourceDef.resource_id);
+              addedResources.push(resourceDef.resource_id);
               if (insertedResources.length === resources.length) {
-                insertedResources = [];
+               // insertedResources = [];
               }
             }
           }
@@ -248,7 +253,6 @@ export function fillGridDump(
   } else {
     for (let yi = 0; yi < yRange.length; yi += spacing) {
       const y = yRange[yi];
-      console.log(`Processing column: ${y}`);
       for (let xi = 0; xi < xRange.length; xi += spacing) {
         const x = xRange[xi];
 
@@ -280,8 +284,9 @@ export function fillGridDump(
 
             if (!insertedResources.includes(resourceDef.resource_id)) {
               insertedResources.push(resourceDef.resource_id);
+              addedResources.push(resourceDef.resource_id);
               if (insertedResources.length === resources.length) {
-                insertedResources = [];
+               // insertedResources = [];
               }
             }
           }
@@ -291,5 +296,102 @@ export function fillGridDump(
   }
 
   console.log(`Total cost: ${cost}`);
-  return { grid, cost };
+  return { grid, cost , addedResources};
+}
+
+export function fillGridBeamSearch(
+  initialGrid: number[][],
+  resources: Resource[],
+  canPlaceFn: (
+    grid: number[][],
+    shape: [number, number][],
+    top: number,
+    left: number,
+    resource: Resource
+  ) => number,
+  resourceCalc: (resource: Resource) => number,
+  calculateScore: (
+    grid: number[][],
+    resources: Resource[],
+    addedResources: number[],
+    cost: number
+  ) => number,
+  spacing: number,
+  budget: number,
+  beamWidth: number = 5
+): { grid: number[][]; cost: number; addedResources: number[] } {
+  type State = {
+    grid: number[][];
+    cost: number;
+    addedResources: number[];
+    insertedResources: number[];
+  };
+
+  let beam: State[] = [{
+    grid: structuredClone(initialGrid),
+    cost: 0,
+    addedResources: [],
+    insertedResources: []
+  }];
+
+  for (let y = 0; y < initialGrid.length; y += spacing) {
+    for (let x = 0; x < initialGrid[0].length; x += spacing) {
+      const candidates: State[] = [];
+
+      for (const state of beam) {
+        const orderedResources = prioritizeResources(
+          resources,
+          state.insertedResources,
+          resourceCalc
+        );
+
+        for (const resource of orderedResources) {
+          for (const orientation of resource.orientations) {
+            const score = canPlaceFn(state.grid, orientation.cells, y, x, resource);
+            if (score === -1) continue;
+
+            if (state.cost + resource.cost > budget) continue;
+
+            const newGrid = structuredClone(state.grid);
+            placeShape(newGrid, orientation.cells, y, x, resource.resource_id);
+
+            const newInserted = [...state.insertedResources];
+            if (!newInserted.includes(resource.resource_id)) {
+              newInserted.push(resource.resource_id);
+            }
+
+            const newAdded = [...state.addedResources, resource.resource_id];
+
+            const newCost = state.cost + resource.cost;
+
+            candidates.push({
+              grid: newGrid,
+              cost: newCost,
+              addedResources: newAdded,
+              insertedResources: newInserted
+            });
+          }
+        }
+
+        // Option to keep state with no placement too
+        candidates.push(state);
+      }
+
+      // Sort candidates by score and trim beam
+      beam = candidates
+        .map(c => ({
+          ...c,
+          score: calculateScore(c.grid, resources, c.addedResources, c.cost)
+        }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, beamWidth);
+    }
+  }
+
+  const best = beam[0];
+  return {
+    grid: best.grid,
+    cost: best.cost,
+    addedResources: best.addedResources
+  };
 }
